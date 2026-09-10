@@ -933,7 +933,7 @@ class GamblingDataCacheRepository @Inject() (
 
       db.withConnection { conn =>
         val cs = conn.prepareCall(
-          "{ call MGD_DC_VARIATION_PK.GET_PREMISES(P_MGD_REG_NUMBER => ?, P_PREMISES => ?, P_TOTAL_ROWS => ?) }"
+          "{ call MGD_DC_VARIATION_PK.GET_PREMISES(P_MGD_REG_NUMBER => ?, P_ROWS_PER_PAGE => ?, P_PAGE_NO => ?, P_PREMISES => ?, P_TOTAL_ROWS => ?) }"
         )
 
         def closeQuietly(c: AutoCloseable): Unit =
@@ -946,18 +946,20 @@ class GamblingDataCacheRepository @Inject() (
         try {
 
           cs.setString(1, mgdRegNumber)
-          cs.registerOutParameter(2, oracle.jdbc.OracleTypes.CURSOR)
-          cs.registerOutParameter(3, java.sql.Types.NUMERIC)
+          cs.setInt(2, -1) // fetch all rows
+          cs.setInt(3, 0) // first page
+          cs.registerOutParameter(4, oracle.jdbc.OracleTypes.CURSOR)
+          cs.registerOutParameter(5, java.sql.Types.NUMERIC)
 
           cs.execute()
 
           val count =
-            Option(cs.getObject(3))
+            Option(cs.getObject(5))
               .map(_.asInstanceOf[java.math.BigDecimal].intValue())
               .getOrElse(0)
 
           val optionResultSet =
-            Option(cs.getObject(2).asInstanceOf[java.sql.ResultSet])
+            Option(cs.getObject(4).asInstanceOf[java.sql.ResultSet])
 
           try {
 

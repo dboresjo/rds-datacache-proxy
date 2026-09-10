@@ -418,7 +418,7 @@ class GamblingDataCacheRepositorySpec extends AnyFlatSpec with Matchers with Bef
 
     val mgdRegNumber = "XWM00000001770"
 
-    when(mockCs.getObject(2)).thenReturn(premisesRs)
+    when(mockCs.getObject(4)).thenReturn(premisesRs)
     when(premisesRs.next()).thenReturn(true, false)
 
     when(premisesRs.getString("MGD_REG_NUMBER")).thenReturn(mgdRegNumber)
@@ -428,7 +428,7 @@ class GamblingDataCacheRepositorySpec extends AnyFlatSpec with Matchers with Bef
     when(premisesRs.getString("ADDRESS_4")).thenReturn("bar")
     when(premisesRs.getString("POSTCODE")).thenReturn("SR1 4DE")
     when(premisesRs.getDate("SYSTEM_DATE")).thenReturn(Date.valueOf("2026-05-13"))
-    when(mockCs.getObject(3)).thenReturn(java.math.BigDecimal.valueOf(100))
+    when(mockCs.getObject(5)).thenReturn(java.math.BigDecimal.valueOf(100))
 
     val result =
       repository.getPremisesDetails(mgdRegNumber).futureValue
@@ -449,8 +449,10 @@ class GamblingDataCacheRepositorySpec extends AnyFlatSpec with Matchers with Bef
     )
 
     verify(mockCs).setString(1, mgdRegNumber)
-    verify(mockCs).registerOutParameter(2, oracle.jdbc.OracleTypes.CURSOR)
-    verify(mockCs).registerOutParameter(3, java.sql.Types.NUMERIC)
+    verify(mockCs).setInt(2, -1)
+    verify(mockCs).setInt(3, 0)
+    verify(mockCs).registerOutParameter(4, oracle.jdbc.OracleTypes.CURSOR)
+    verify(mockCs).registerOutParameter(5, java.sql.Types.NUMERIC)
     verify(mockCs).execute()
     verify(premisesRs).close()
     verify(mockCs).close()
